@@ -58,3 +58,28 @@ ALTER TABLE `clientes`
 ALTER TABLE `clientes`
   MODIFY `idCliente` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 COMMIT;
+--
+-- Table structure for table `usuarios_usss009724`
+--
+
+CREATE TABLE `usuarios_usss009724` (
+  `idUsuario` int(10) NOT NULL,
+  `usuario` char(35) NOT NULL,
+  `clave` char(35) NOT NULL,
+  `nombre` char(85) NOT NULL,
+  `direccion` char(100) NOT NULL,
+  `telefono` char(9) NOT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4;
+
+--
+-- Indexes for table `usuarios_usss009724`
+--
+ALTER TABLE `usuarios_usss009724`
+  ADD PRIMARY KEY (`idUsuario`);
+
+--
+-- AUTO_INCREMENT for table `usuarios_usss009724`
+--
+ALTER TABLE `usuarios_usss009724`
+  MODIFY `idUsuario` int(10) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1;
+COMMIT;

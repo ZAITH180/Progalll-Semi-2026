@@ -3,12 +3,13 @@ from urllib import parse
 from urllib.parse import urlparse, parse_qs
 import crud_clientes
 import crud_productos
-
+import crud_usuarios
 import json
 
 port = 3000
 crudClientes = crud_clientes.crud_clientes()
 crudProductos = crud_productos.crud_productos()
+crudUsuarios = crud_usuarios.crud_usuarios()
 
 class miServidor(SimpleHTTPRequestHandler):
     def do_POST(self):
@@ -17,10 +18,20 @@ class miServidor(SimpleHTTPRequestHandler):
         datos = datos.decode("utf-8")
         datos = parse.unquote(datos)
         datos = json.loads(datos)
+        
         if datos["modulo"] == "cliente":
             respuesta = {'msg': crudClientes.administrar(datos)}
         elif datos["modulo"] == "producto":
             respuesta = {'msg': crudProductos.administrar(datos)}
+        elif datos["modulo"] == "usuario":
+            respuesta = {'msg': crudUsuarios.administrar(datos)}
+        elif datos["modulo"] == "login":
+            # Validación de acceso para el login (Punto 5)
+            user = crudUsuarios.validar_login(datos['usuario'], datos['clave'])
+            if user and len(user) > 0:
+                respuesta = {'status': 'ok', 'msg': 'Acceso concedido'}
+            else:
+                respuesta = {'status': 'error', 'msg': 'Usuario o contraseña incorrectos'}
 
         self.send_response(200)
         self.send_header("Content-type","application/json")
@@ -33,7 +44,6 @@ class miServidor(SimpleHTTPRequestHandler):
        
         if urlParse.path == "/clientes":
             buscar = qs.get('buscar', [''])[0]
-            print(buscar)
             datos = crudClientes.consultar(buscar)
             self.send_response(200)
             self.send_header("Content-type","text/json")
@@ -47,13 +57,25 @@ class miServidor(SimpleHTTPRequestHandler):
             self.send_header("Content-type","text/json")
             self.end_headers()
             self.wfile.write(json.dumps(datos).encode("utf-8"))
+
+        elif urlParse.path == "/usuarios":
+            buscar = qs.get('buscar', [''])[0]
+            datos = crudUsuarios.consultar(buscar)
+            self.send_response(200)
+            self.send_header("Content-type","text/json")
+            self.end_headers()
+            self.wfile.write(json.dumps(datos).encode("utf-8"))
         
         elif self.path == "/":
-            self.path = "/index.html"
+            # Indicación 5: El login debe ser lo primero que se muestre al ejecutar el servidor
+            self.path = "/login.html"
             return SimpleHTTPRequestHandler.do_GET(self)
 
         elif urlParse.path == "/vistas":
             self.path = f"/modulos/{qs.get('form', [''])[0]}.html"
+            return SimpleHTTPRequestHandler.do_GET(self)
+        
+        else:
             return SimpleHTTPRequestHandler.do_GET(self)
 
 print(f"Servidor corriendo en el puerto {port}")
